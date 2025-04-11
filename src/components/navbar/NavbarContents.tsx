@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
-const NavbarContents = () => {
+const NavbarContents = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
   const [isMobileTipOpen, setIsMobileTipOpen] = useState(false);
   const [isSignin, setIsSignin] = useState(false);
   const pathname = usePathname();
@@ -36,14 +36,18 @@ const NavbarContents = () => {
           <NavbarMenu />
         </div>
       </div>
-
-      <Link
-        href="/signin"
-        className="hidden rounded-full px-5 py-2 text-base font-semibold transition-all hover:shadow-sm lg:block"
-      >
-        로그인
-      </Link>
-
+      {isLoggedIn ? (
+        <button className="hidden cursor-pointer rounded-full px-5 py-2 text-base font-semibold transition-all hover:shadow-sm lg:block">
+          로그아웃
+        </button>
+      ) : (
+        <Link
+          href="/signin"
+          className="hidden cursor-pointer rounded-full px-5 py-2 text-base font-semibold transition-all hover:shadow-sm lg:block"
+        >
+          로그인
+        </Link>
+      )}
       {isSignin && (
         <button
           onClick={handleMobileTipOpen}
