@@ -1,7 +1,11 @@
+import MainNoticeBar from "./components/MainNoticeBar";
+
 const Home = () => {
   return (
     <main>
-      메인페이지
+      <div className="w-full max-w-7xl mx-auto py-28 px-5">
+        <MainNoticeBar />
+      </div>
     </main>
   );
 };
