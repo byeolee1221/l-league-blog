@@ -5,6 +5,7 @@ import NavbarMenu from "./NavbarMenu";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/tailwindMerge";
 
 const NavbarContents = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
   const [isMobileTipOpen, setIsMobileTipOpen] = useState(false);
@@ -24,8 +25,13 @@ const NavbarContents = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
   }, [pathname]);
 
   return (
-    <div className="relative mx-auto flex h-16 w-full max-w-7xl items-center justify-center px-4 transition-all md:h-[70px] md:px-6 lg:h-[76px] lg:justify-between lg:px-8">
-      <div className="flex items-center lg:space-x-20">
+    <div className="relative mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 transition-all md:h-[70px] md:px-6 lg:h-[76px] lg:px-8">
+      <div
+        className={cn(
+          "flex items-center lg:space-x-20",
+          isSignin ? "" : "absolute left-1/2 -translate-x-1/2 lg:static lg:left-auto lg:translate-x-0",
+        )}
+      >
         <Link
           href="/"
           className="group flex items-center space-x-1.5 text-xl font-bold text-orange-500 md:text-2xl lg:text-3xl"
@@ -36,6 +42,7 @@ const NavbarContents = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
           <NavbarMenu />
         </div>
       </div>
+
       {isLoggedIn ? (
         <button className="hidden cursor-pointer rounded-full px-5 py-2 text-base font-semibold transition-all hover:shadow-sm lg:block">
           로그아웃
@@ -48,6 +55,7 @@ const NavbarContents = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
           로그인
         </Link>
       )}
+
       {isSignin && (
         <button
           onClick={handleMobileTipOpen}
