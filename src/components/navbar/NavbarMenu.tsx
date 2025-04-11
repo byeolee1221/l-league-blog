@@ -74,14 +74,11 @@ const NavbarMenu = () => {
             <button
               className={cn(
                 "flex items-center rounded-full px-3 py-2 text-base font-semibold transition-all hover:shadow-sm",
-                pathname.includes("/posts") && "text-orange-500"
+                pathname.includes("/posts") && "text-orange-500",
               )}
             >
               {item.label}
-              {getListIcon(
-                "arrowDown",
-                `ml-1 size-4 transition-transform ${isMenuOpen ? "rotate-180" : ""}`
-              )}
+              {getListIcon("arrowDown", `ml-1 size-4 transition-transform ${isMenuOpen ? "rotate-180" : ""}`)}
             </button>
           )}
           {item.hasSubmenu && (
@@ -92,7 +89,7 @@ const NavbarMenu = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute left-0 top-full z-50 mt-1 w-56 flex-col space-y-1 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg"
+                  className="absolute top-full left-0 z-50 mt-1 w-56 flex-col space-y-1 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg"
                 >
                   {categoryItems.map((submenuItem) => (
                     <Link

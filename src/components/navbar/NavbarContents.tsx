@@ -13,11 +13,11 @@ const NavbarContents = () => {
   };
 
   return (
-    <div className="flex h-16 w-full max-w-7xl mx-auto items-center justify-between px-4 transition-all md:h-[70px] md:px-6 lg:h-[76px] lg:px-8">
+    <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 transition-all md:h-[70px] md:px-6 lg:h-[76px] lg:px-8">
       <div className="relative flex items-center space-x-6 md:space-x-10 lg:space-x-20">
         <Link
           href="/"
-          className="group flex items-center space-x-1.5 text-orange-500 font-bold text-xl md:text-2xl lg:text-3xl"
+          className="group flex items-center space-x-1.5 text-xl font-bold text-orange-500 md:text-2xl lg:text-3xl"
         >
           BLOG
         </Link>
@@ -25,7 +25,7 @@ const NavbarContents = () => {
       </div>
       <Link
         href="/signin"
-        className="hidden rounded-full px-5 py-2 text-base font-semibold transition-all lg:block hover:shadow-sm"
+        className="hidden rounded-full px-5 py-2 text-base font-semibold transition-all hover:shadow-sm lg:block"
       >
         로그인
       </Link>
