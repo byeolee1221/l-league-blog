@@ -4,9 +4,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/tailwindMerge";
+import { useEffect, useState } from "react";
 
 const MobileNavbar = () => {
   const pathname = usePathname();
+  const [showMobileNavbar, setShowMobileNavbar] = useState(false);
+
+  useEffect(() => {
+    if (pathname === "/signin") { 
+      setShowMobileNavbar(false);
+    } else {
+      setShowMobileNavbar(true);
+    }
+  }, [pathname]);
 
   const navItems = [
     {
@@ -32,7 +42,7 @@ const MobileNavbar = () => {
   ];
 
   return (
-    <div className="fixed right-0 bottom-0 left-0 z-50 border-t border-gray-200 bg-white lg:hidden">
+    <div className={cn("fixed right-0 bottom-0 left-0 z-50 border-t border-gray-200 bg-white lg:hidden", showMobileNavbar ? "block" : "hidden")}>
       <div className="flex h-16 items-center justify-around">
         {navItems.map((item) => (
           <Link
