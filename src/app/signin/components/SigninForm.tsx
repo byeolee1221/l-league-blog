@@ -1,17 +1,31 @@
 "use client";
 
 import { getListIcon } from "@/lib/iconMapping";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { signinAction } from "../action/signinAction";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const SigninForm = () => {
   const [email, setEmail] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [state, formAction, isPending] = useActionState(signinAction, null);
+  const router = useRouter();
 
   const handleClickPasswordVisible = () => {
     setIsPasswordVisible((prev) => !prev);
   };
+
+  useEffect(() => {
+    if (state?.success) {
+      toast.success("로그인에 성공했습니다.");
+      router.push("/");
+    } else if (state?.error) {
+      if (typeof state.error === "string") {
+        toast.error(state.error);
+      }
+    }
+  }, [state, router]);
 
   return (
     <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-none transition-all sm:max-w-lg sm:shadow-xl md:max-w-xl">
@@ -72,8 +86,8 @@ const SigninForm = () => {
             disabled={isPending}
           >
             {isPending ? (
-              <span className="flex items-center justify-center space-x-2 animate-spin">
-                {getListIcon("spinner", "size-5 sm:size-6")}
+              <span className="flex items-center justify-center space-x-2">
+                {getListIcon("spinner", "size-5 sm:size-6 animate-spin")}
               </span>
             ) : (
               "로그인"

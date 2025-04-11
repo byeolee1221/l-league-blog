@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { signinSchema } from "../schema/signinSchema";
 
 export const signinAction = async (prevState: unknown, formData: FormData) => {
@@ -57,7 +58,25 @@ export const signinAction = async (prevState: unknown, formData: FormData) => {
     }
 
     const result = await response.json();
-    return { success: true, access: result.access, refresh: result.refresh };
+    const cookieStore = cookies();
+
+    (await cookieStore).set("access_token", result.access, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60,
+      path: "/",
+      sameSite: "strict",
+    });
+
+    (await cookieStore).set("refresh_token", result.refresh, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+      sameSite: "strict",
+    });
+
+    return { success: true };
   } catch (error) {
     console.error("로그인 처리 중 오류 발생:", error);
     return { error: "로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요." };
