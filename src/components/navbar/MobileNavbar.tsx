@@ -11,7 +11,7 @@ const MobileNavbar = () => {
   const [showMobileNavbar, setShowMobileNavbar] = useState(false);
 
   useEffect(() => {
-    if (pathname === "/signin") { 
+    if (pathname === "/signin" || pathname === "/posts/write") {
       setShowMobileNavbar(false);
     } else {
       setShowMobileNavbar(true);
