@@ -4,6 +4,8 @@ import { IoIosArrowDown, IoIosArrowForward, IoIosArrowBack } from "react-icons/i
 import { IoEyeOffOutline } from "react-icons/io5";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { FaSpinner } from "react-icons/fa";
+import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
+import { HiOutlineX } from "react-icons/hi";
 
 export type IconKey = 
   | "arrowDown"
@@ -12,6 +14,8 @@ export type IconKey =
   | "eyeOff"
   | "eyeOn"
   | "spinner"
+  | "search"
+  | "x"
 
 type IconMapping = {
   [key in IconKey]: IconType;
@@ -24,6 +28,8 @@ export const iconMapping: IconMapping = {
   eyeOff: IoEyeOffOutline,
   eyeOn: MdOutlineRemoveRedEye,
   spinner: FaSpinner,
+  search: HiOutlineMagnifyingGlass,
+  x: HiOutlineX,
 }
 
 export const getListIcon = (icon: IconKey, className?: string): ReactElement | null => { 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -10,6 +10,7 @@ import { getPosts } from "../action/getPosts";
 import BlogCategoryList from "./BlogCategoryList";
 import BlogPostList from "./BlogPostList";
 import BlogPagination from "./BlogPagination";
+import BlogSearchBar from "./BlogSearchBar";
 
 // 기본 카테고리 데이터 (API 실패 시 사용)
 const defaultCategoryData: Category = {
@@ -48,8 +49,10 @@ const getCategories = async (): Promise<Category> => {
 
 const BlogSection = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [activeCategory, setActiveCategory] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   // 카테고리 데이터 가져오기
   const { data: categories, isLoading: isCategoriesLoading } = useQuery<Category>({
@@ -64,12 +67,13 @@ const BlogSection = () => {
     isLoading: isPostsLoading,
     isError: isPostsError,
   } = useQuery<Post>({
-    queryKey: ["posts", activeCategory, currentPage],
+    queryKey: ["posts", activeCategory, currentPage, searchQuery],
     queryFn: async () => {
       const result = await getPosts({
         category_id: activeCategory,
         page: currentPage,
         page_size: 10,
+        title: searchQuery || undefined,
       });
 
       if (result.error) {
@@ -84,9 +88,25 @@ const BlogSection = () => {
   // URL의 category 파라미터로 활성 카테고리 설정
   useEffect(() => {
     const category = searchParams.get("category") || "1";
+    const query = searchParams.get("query") || "";
     setActiveCategory(Number(category));
+    setSearchQuery(query);
     setCurrentPage(1);
   }, [searchParams]);
+
+  const handleSearch = (query: string) => { 
+    setSearchQuery(query);
+    setCurrentPage(1);
+
+    const params = new URLSearchParams(searchParams);
+    if (query) { 
+      params.set("query", query);
+    } else { 
+      params.delete("query");
+    }
+
+    router.push(`/?${params.toString()}`);
+  }
 
   // 페이지 변경 핸들러
   const handlePageChange = (page: number) => {
@@ -98,6 +118,7 @@ const BlogSection = () => {
     <div className="flex flex-col space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="hidden text-2xl font-semibold md:block">블로그</h2>
+        <BlogSearchBar onSearch={handleSearch} initialQuery={searchQuery} className="w-full md:w-auto" />
       </div>
 
       {/* 카테고리 목록 */}
