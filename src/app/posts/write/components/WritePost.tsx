@@ -1,15 +1,19 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { writePostAction } from "@/app/posts/action/writePostAction";
+import { WritePostSchema } from "@/app/posts/schema/writePostSchema";
 import TitleInput from "./TitleInput";
 import CategorySelector from "./CategorySelector";
 import ContentTextarea from "./ContentTextarea";
 import ImageUploaderSection from "./ImageUploaderSection";
 import AgreeToTerms from "./AgreeToTerms";
 import SubmitButton from "./SubmitButton";
+import { z } from "zod";
 
 const categories = [
   { id: 1, name: "일상생활" },
@@ -19,131 +23,152 @@ const categories = [
   { id: 5, name: "기타" },
 ];
 
+// 이미지 정보를 관리하는 타입
+interface ImageInfo {
+  file: File | null;
+  preview: string | null;
+}
+
+type FormValues = z.infer<typeof WritePostSchema>;
+
 const WritePost = () => {
   const router = useRouter();
-  const formRef = useRef<HTMLFormElement>(null);
-  const [state, formAction, isPending] = useActionState(writePostAction, null);
+  const [isPending, setIsPending] = useState(false);
+  const {
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+    reset,
+  } = useForm<FormValues>({
+    resolver: zodResolver(WritePostSchema),
+    defaultValues: {
+      title: "",
+      content: "",
+      categoryId: "",
+      agreedToTerms: false,
+    },
+  });
 
-  // 상태 관리
-  const [title, setTitle] = useState("");
-  const [categoryId, setCategoryId] = useState<number | null>(null);
-  const [content, setContent] = useState("");
-  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
-  const [subImagePreview, setSubImagePreview] = useState<string | null>(null);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [images, setImages] = useState<{
+    main: ImageInfo;
+    sub: ImageInfo;
+  }>({
+    main: { file: null, preview: null },
+    sub: { file: null, preview: null },
+  });
 
-  // 서버 액션 결과 처리
-  useEffect(() => {
-    if (state?.success) {
-      toast.success("게시글이 성공적으로 등록되었습니다.");
-      router.push(`/posts/${categoryId}/${state.postId}`);
-    } else if (state?.error && typeof state.error === "string") {
-      toast.error(state.error);
-    }
-  }, [state, router, categoryId]);
+  const title = watch("title");
+  const content = watch("content");
+  const agreedToTerms = watch("agreedToTerms");
+  const categoryId = watch("categoryId");
 
-  // 이미지 처리 핸들러
-  const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 이미지 핸들러
+  const handleImageChange = (type: "main" | "sub") => (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setMainImagePreview(imageUrl);
+      setImages((prev) => ({
+        ...prev,
+        [type]: {
+          file,
+          preview: URL.createObjectURL(file),
+        },
+      }));
     }
   };
 
-  const handleSubImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setSubImagePreview(imageUrl);
-    }
+  // 이미지 취소 핸들러
+  const handleImageClear = (type: "main" | "sub") => () => {
+    setImages((prev) => ({
+      ...prev,
+      [type]: { file: null, preview: null },
+    }));
   };
 
-  // 이미지 취소 핸들러 함수 추가
-  const handleMainImageClear = () => {
-    setMainImagePreview(null);
-    // input의 value를 리셋
-    if (formRef.current) {
-      const input = formRef.current.querySelector("#mainImage") as HTMLInputElement;
-      if (input) input.value = "";
-    }
-  };
-
-  const handleSubImageClear = () => {
-    setSubImagePreview(null);
-    // input의 value를 리셋
-    if (formRef.current) {
-      const input = formRef.current.querySelector("#subImage") as HTMLInputElement;
-      if (input) input.value = "";
-    }
-  };
-
-  // 카테고리 변경 핸들러
-  const handleCategorySelect = (id: number) => {
-    setCategoryId(id);
-  };
-
-  // form 제출 전 유효성 검사
-  const validateForm = () => {
-    // 필수 필드만 간단히 확인하고, 자세한 검증은 Zod로 진행
-    if (!title.trim()) {
-      toast.error("제목을 입력해주세요.");
-      return false;
+  // 폼 제출 핸들러
+  const onSubmit = async (data: FormValues) => {
+    if (!images.main.file) {
+      toast.error("대표사진을 등록해주세요");
+      return;
     }
 
-    if (!categoryId) {
-      toast.error("카테고리를 선택해주세요.");
-      return false;
-    }
+    setIsPending(true);
 
-    if (!agreedToTerms) {
-      toast.error("이용 정책에 동의해주세요.");
-      return false;
-    }
+    try {
+      const formData = new FormData();
 
-    return true;
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, typeof value === "boolean" ? value.toString() : value);
+      });
+
+      // 이미지 파일 추가
+      if (images.main.file) formData.append("mainImage", images.main.file);
+      if (images.sub.file) formData.append("subImage", images.sub.file);
+
+      const result = await writePostAction(null, formData);
+
+      if (result.success) {
+        toast.success("게시글이 성공적으로 등록되었습니다");
+        reset();
+        setImages({
+          main: { file: null, preview: null },
+          sub: { file: null, preview: null },
+        });
+        router.push(`/posts/${result.categoryId}/${result.postId}`);
+      } else if (result.error) {
+        if (typeof result.error === "string") {
+          toast.error(result.error);
+        } else {
+          const firstError = Object.values(result.error).find((e) => e);
+          if (firstError) toast.error(firstError as string);
+        }
+      }
+    } catch (error) {
+      console.error("게시글 등록 중 오류가 발생했습니다:", error);
+      toast.error("게시글 등록 중 오류가 발생했습니다");
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
     <div className="flex flex-col space-y-6">
-      {/* 글 작성 폼 */}
-      <form
-        ref={formRef}
-        action={formAction}
-        className="flex flex-col space-y-6"
-        onSubmit={(e) => {
-          if (!validateForm()) {
-            e.preventDefault();
-          }
-        }}
-      >
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col space-y-6">
         {/* 제목 입력 */}
-        <TitleInput value={title} onChange={setTitle} error={state?.error?.title} />
+        <TitleInput value={title} onChange={(value) => setValue("title", value)} error={errors.title?.message} />
 
         {/* 이미지 업로드 */}
         <ImageUploaderSection
-          mainImagePreview={mainImagePreview}
-          subImagePreview={subImagePreview}
-          onMainImageChange={handleMainImageChange}
-          onSubImageChange={handleSubImageChange}
-          onMainImageClear={handleMainImageClear}
-          onSubImageClear={handleSubImageClear}
-          mainImageError={state?.error?.mainImage}
+          mainImagePreview={images.main.preview}
+          subImagePreview={images.sub.preview}
+          onMainImageChange={handleImageChange("main")}
+          onSubImageChange={handleImageChange("sub")}
+          onMainImageClear={handleImageClear("main")}
+          onSubImageClear={handleImageClear("sub")}
+          mainImageError={!images.main.file ? "대표사진을 등록해주세요" : undefined}
         />
 
         {/* 카테고리 선택 */}
         <CategorySelector
           categories={categories}
-          selectedId={categoryId}
-          onChange={handleCategorySelect}
-          error={state?.error?.categoryId}
+          selectedId={categoryId ? parseInt(categoryId) : null}
+          onChange={(id) => setValue("categoryId", id.toString())}
+          error={errors.categoryId?.message}
         />
 
         {/* 내용 입력 */}
-        <ContentTextarea value={content} onChange={setContent} error={state?.error?.content} />
+        <ContentTextarea
+          value={content}
+          onChange={(value) => setValue("content", value)}
+          error={errors.content?.message}
+        />
 
         {/* 이용 약관 동의 */}
-        <AgreeToTerms value={agreedToTerms} onChange={setAgreedToTerms} error={state?.error?.agreedToTerms} />
+        <AgreeToTerms
+          value={agreedToTerms}
+          onChange={(value) => setValue("agreedToTerms", value)}
+          error={errors.agreedToTerms?.message}
+        />
 
         {/* 제출 버튼 */}
         <SubmitButton isPending={isPending} />

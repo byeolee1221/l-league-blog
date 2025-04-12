@@ -1,7 +1,8 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { PostSchema } from "../schema/writePostSchema";
+import { WritePostSchema } from "../schema/writePostSchema";
+import { uploadImage } from "./uploadImage";
 
 export const writePostAction = async (prevState: unknown, formData: FormData) => {
   try {
@@ -12,60 +13,91 @@ export const writePostAction = async (prevState: unknown, formData: FormData) =>
       return { error: "로그인이 필요한 서비스입니다." };
     }
 
-    const writePostData = {
-      title: formData.get("title") as string,
-      categoryId: formData.get("categoryId") as string,
-      content: formData.get("content") as string,
-      mainImage: formData.get("mainImage") as File,
-      subImage: formData.get("subImage") as File,
-      agreedToTerms: formData.get("agreedToTerms") as string,
-    }
+    // 클라이언트에서 넘어온 데이터 처리
+    const title = formData.get("title") as string;
+    const categoryId = formData.get("categoryId") as string;
+    const content = formData.get("content") as string;
+    const mainImage = formData.get("mainImage") as File;
+    const subImage = formData.get("subImage") as File;
+    const agreedToTermsString = formData.get("agreedToTerms") as string;
 
-    // Zod를 사용한 입력 검증
-    const validationResult = PostSchema.safeParse(writePostData);
+    // 문자열을 불리언으로 변환
+    const agreedToTerms = agreedToTermsString === "true";
+
+    // 기본 데이터 Zod로 검증
+    const validationResult = WritePostSchema.safeParse({
+      title,
+      categoryId,
+      content,
+      agreedToTerms,
+    });
 
     if (!validationResult.success) {
-      return { error: validationResult.error.flatten().fieldErrors }
+      return { error: validationResult.error.flatten().fieldErrors };
     }
 
-    // 유효성 검증 통과 - API 요청 준비
-    const data = new FormData();
-    data.append("title", writePostData.title);
-    data.append("categoryId", writePostData.categoryId);
-    data.append("content", writePostData.content);
-    if (writePostData.mainImage && writePostData.mainImage.size > 0) data.append("mainImage", writePostData.mainImage);
-    if (writePostData.subImage && writePostData.subImage.size > 0) data.append("subImage", writePostData.subImage);
+    // 이미지 검증
+    if (!mainImage || mainImage.size === 0) {
+      return { error: { mainImage: "대표사진을 등록해주세요." } };
+    }
 
-    // API 요청
+    // 1. 메인 이미지 업로드
+    const mainImageName = `blog_main_${Date.now()}_${mainImage.name}`;
+    const mainImageResult = await uploadImage(mainImage, mainImageName);
+
+    // 업로드 결과가 에러인지 확인
+    if ("error" in mainImageResult) {
+      return { error: { mainImage: mainImageResult.error } };
+    }
+
+    // 2. 서브 이미지 업로드 (있는 경우에만)
+    let subImageURL = null;
+    if (subImage && subImage.size > 0) {
+      const subImageName = `blog_sub_${Date.now()}_${subImage.name}`;
+      const subImageResult = await uploadImage(subImage, subImageName);
+
+      // 업로드 결과가 에러인지 확인
+      if ("error" in subImageResult) {
+        return { error: { subImage: subImageResult.error } };
+      }
+
+      subImageURL = subImageResult.imageURL;
+    }
+
+    // 3. API에 전송할 데이터 준비 (검증된 데이터 사용)
+    const postData = {
+      title: validationResult.data.title,
+      category: parseInt(validationResult.data.categoryId),
+      content: validationResult.data.content,
+      main_Image: mainImageResult.imageURL,
+      sub_Image: subImageURL,
+    };
+
+    // 4. 게시글 등록 API 요청
     const response = await fetch(`${process.env.BASE_API_URL}/api/v1/blog`, {
       method: "POST",
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
-      body: data,
+      body: JSON.stringify(postData),
     });
 
+    // 응답 처리
     if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-
-      switch (response.status) {
-        case 400:
-          return { error: "잘못된 요청입니다." };
-        case 401:
-          return { error: "로그인이 필요한 서비스입니다." };
-        case 403:
-          return { error: "글 작성 권한이 없습니다." };
-        case 500:
-          return { error: "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요." };
-        default:
-          return {
-            error: errorData?.message || errorData?.error || "게시글 등록 중 오류가 발생했습니다.",
-          };
+      // 에러 응답 처리
+      try {
+        const errorData = await response.json();
+        return {
+          error: errorData?.message || errorData?.error || "게시글 등록 중 오류가 발생했습니다.",
+        };
+      } catch {
+        return { error: "게시글 등록 중 오류가 발생했습니다." };
       }
     }
 
     const result = await response.json();
-    return { success: true, postId: result.id };
+    return { success: true, postId: result.id, categoryId: result.category_id };
   } catch (error) {
     console.error("게시글 등록 중 오류 발생:", error);
     return { error: "게시글 등록 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요." };
