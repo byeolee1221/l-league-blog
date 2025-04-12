@@ -3,6 +3,7 @@ import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar/Navbar";
 import { Toaster } from "react-hot-toast";
+import QueryProvider from "./QueryProvider";
 
 const notoSansKR = Noto_Sans_KR({
   weight: ["400", "500", "600", "700"],
@@ -24,14 +25,16 @@ export default function RootLayout({
       <body
         className={`${notoSansKR.className} text-gray-900 antialiased`}
       >
-        <Navbar />
-        {children}
-        <Toaster
-          toastOptions={{
-            success: { style: { fontSize: "14px" } },
-            error: { style: { fontSize: "14px" } },
-          }}
-        />
+        <QueryProvider>
+          <Navbar />
+          {children}
+          <Toaster
+            toastOptions={{
+              success: { style: { fontSize: "14px" } },
+              error: { style: { fontSize: "14px" } },
+            }}
+          />
+        </QueryProvider>
       </body>
     </html>
   );

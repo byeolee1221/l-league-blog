@@ -1,19 +1,98 @@
 "use client";
 
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { cn } from "@/lib/tailwindMerge";
+import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { Category } from "@/types/category";
+import { Post } from "@/types/post";
+import { getPosts } from "../action/getPosts";
+import BlogCategoryList from "./BlogCategoryList";
+import BlogPostList from "./BlogPostList";
+import BlogPagination from "./BlogPagination";
+
+// 기본 카테고리 데이터 (API 실패 시 사용)
+const defaultCategoryData: Category = {
+  count: 5,
+  totalCnt: 5,
+  pageCnt: 1,
+  curPage: 1,
+  nextPage: null,
+  previousPage: null,
+  data: [
+    { id: 1, name: "일상생활" },
+    { id: 2, name: "맛집소개" },
+    { id: 3, name: "제품후기" },
+    { id: 4, name: "IT정보" },
+    { id: 5, name: "기타" },
+  ],
+};
+
+const getCategories = async (): Promise<Category> => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/v1/category`);
+
+    if (!response.ok) {
+      toast.error("카테고리 목록을 불러오는데 실패했습니다.");
+      return defaultCategoryData;
+    }
+
+    const data: Category = await response.json();
+    return data;
+  } catch (error) {
+    console.error("카테고리 목록을 불러오는데 실패했습니다.", error);
+    toast.error("카테고리 목록을 불러오는데 실패했습니다.");
+    return defaultCategoryData;
+  }
+};
 
 const BlogSection = () => {
   const searchParams = useSearchParams();
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [activeCategory, setActiveCategory] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  // 카테고리 데이터 가져오기
+  const { data: categories, isLoading: isCategoriesLoading } = useQuery<Category>({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+    initialData: defaultCategoryData,
+  });
+
+  // 게시글 데이터 가져오기
+  const {
+    data: postsData,
+    isLoading: isPostsLoading,
+    isError: isPostsError,
+  } = useQuery<Post>({
+    queryKey: ["posts", activeCategory, currentPage],
+    queryFn: async () => {
+      const result = await getPosts({
+        category_id: activeCategory,
+        page: currentPage,
+        page_size: 10,
+      });
+
+      if (result.error) {
+        toast.error(result.error);
+        throw new Error(result.error);
+      }
+
+      return result.data;
+    },
+  });
 
   // URL의 category 파라미터로 활성 카테고리 설정
   useEffect(() => {
-    const category = searchParams.get("category") || "all";
-    setActiveCategory(category);
+    const category = searchParams.get("category") || "1";
+    setActiveCategory(Number(category));
+    setCurrentPage(1);
   }, [searchParams]);
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="flex flex-col space-y-6">
@@ -21,47 +100,24 @@ const BlogSection = () => {
         <h2 className="hidden text-2xl font-semibold md:block">블로그</h2>
       </div>
 
-      <div className="scrollbar-hide -mx-4 flex overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:pb-0">
-        <div className="flex space-x-2 md:space-x-4">
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              href={`/?category=${category.id}`}
-              scroll={false}
-              className={cn(
-                "group relative flex min-w-fit flex-col items-center px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors sm:px-4 sm:py-2",
-                activeCategory === category.id ? "text-orange-500" : "text-gray-600 hover:text-orange-500",
-              )}
-            >
-              <span>{category.title}</span>
-              <span
-                className={cn(
-                  "absolute -bottom-0.5 left-0 h-0.5 w-0 bg-orange-500 transition-all duration-300 group-hover:w-full",
-                  activeCategory === category.id ? "w-full" : "",
-                )}
-              />
-            </Link>
-          ))}
-        </div>
-      </div>
+      {/* 카테고리 목록 */}
+      <BlogCategoryList categories={categories} activeCategory={activeCategory} isLoading={isCategoriesLoading} />
 
-      {/* 선택된 카테고리에 따른 블로그 포스트 목록 */}
-      <div className="mt-4 grid gap-4 sm:gap-6 md:grid-cols-4 md:gap-8 lg:grid-cols-8">
-        {/* 여기에 블로그 포스트 카드 컴포넌트들이 들어갑니다 */}
-        <p className="col-span-full text-center text-sm text-gray-500 md:text-left">
-          선택된 카테고리: {categories.find((c) => c.id === activeCategory)?.title}
-        </p>
-      </div>
+      {/* 게시글 목록 */}
+      <BlogPostList
+        postsData={postsData || null}
+        isPostsLoading={isPostsLoading}
+        isPostsError={isPostsError}
+        activeCategory={activeCategory}
+        categories={categories}
+      />
+
+      {/* 페이지네이션 */}
+      {!isPostsLoading && postsData && postsData.data.length > 0 && (
+        <BlogPagination currentPage={currentPage} totalPages={postsData.pageCnt || 1} onPageChange={handlePageChange} />
+      )}
     </div>
   );
 };
 
 export default BlogSection;
-
-const categories = [
-  { id: "all", title: "전체", href: "/posts" },
-  { id: "daily-life", title: "일상생활", href: "/posts/daily-life" },
-  { id: "restaurant", title: "맛집소개", href: "/posts/restaurant-introduction" },
-  { id: "product", title: "제품후기", href: "/posts/product-review" },
-  { id: "it", title: "IT정보", href: "/posts/it-information" },
-];
