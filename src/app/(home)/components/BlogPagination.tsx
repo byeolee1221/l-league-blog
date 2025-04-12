@@ -15,7 +15,7 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-full text-sm",
+          "flex size-8 items-center justify-center rounded-full text-sm",
           currentPage === 1 ? "cursor-not-allowed text-gray-400" : "text-gray-700 hover:bg-gray-100",
         )}
         aria-label="이전 페이지"
@@ -28,7 +28,7 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
           key={page}
           onClick={() => onPageChange(page)}
           className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-full text-sm",
+            "flex size-8 items-center justify-center rounded-full text-sm",
             currentPage === page ? "bg-orange-500 font-medium text-white" : "text-gray-700 hover:bg-gray-100",
           )}
         >
@@ -40,7 +40,7 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-full text-sm",
+          "flex size-8 items-center justify-center rounded-full text-sm",
           currentPage === totalPages ? "cursor-not-allowed text-gray-400" : "text-gray-700 hover:bg-gray-100",
         )}
         aria-label="다음 페이지"
