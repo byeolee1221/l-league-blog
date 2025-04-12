@@ -1,11 +1,17 @@
+import BlogFloatingButton from "./components/BlogFloatingButton";
+import BlogSection from "./components/BlogSection";
 import MainNoticeBar from "./components/MainNoticeBar";
+import ViewRanking from "./components/ViewRanking";
 
 const Home = () => {
   return (
     <main>
-      <div className="w-full max-w-7xl mx-auto py-28 px-5">
+      <div className="mx-auto flex w-full max-w-7xl flex-col space-y-8 px-4 py-28 md:px-6 lg:px-8">
         <MainNoticeBar />
+        <ViewRanking />
+        <BlogSection />
       </div>
+      <BlogFloatingButton />
     </main>
   );
 };

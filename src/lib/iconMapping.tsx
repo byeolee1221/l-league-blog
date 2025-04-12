@@ -1,12 +1,13 @@
 import { ReactElement } from "react";
 import { IconType } from "react-icons/lib";
-import { IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 import { IoEyeOffOutline } from "react-icons/io5";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { FaSpinner } from "react-icons/fa";
 
 export type IconKey = 
   | "arrowDown"
+  | "arrowForward"
   | "eyeOff"
   | "eyeOn"
   | "spinner"
@@ -17,6 +18,7 @@ type IconMapping = {
 
 export const iconMapping: IconMapping = {
   arrowDown: IoIosArrowDown,
+  arrowForward: IoIosArrowForward,
   eyeOff: IoEyeOffOutline,
   eyeOn: MdOutlineRemoveRedEye,
   spinner: FaSpinner,
