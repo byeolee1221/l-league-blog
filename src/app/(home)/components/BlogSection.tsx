@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import toast from "react-hot-toast";
 import { Category } from "@/types/category";
 import { Post } from "@/types/post";
@@ -11,6 +12,11 @@ import BlogCategoryList from "./BlogCategoryList";
 import BlogPostList from "./BlogPostList";
 import BlogPagination from "./BlogPagination";
 import BlogSearchBar from "./BlogSearchBar";
+
+// props에 isLoggedIn 추가
+interface BlogSectionProps {
+  isLoggedIn: boolean;
+}
 
 // 기본 카테고리 데이터 (API 실패 시 사용)
 const defaultCategoryData: Category = {
@@ -47,7 +53,7 @@ const getCategories = async (): Promise<Category> => {
   }
 };
 
-const BlogSection = () => {
+const BlogSection = ({ isLoggedIn }: BlogSectionProps) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState<number>(1);
@@ -61,7 +67,7 @@ const BlogSection = () => {
     initialData: defaultCategoryData,
   });
 
-  // 게시글 데이터 가져오기
+  // 게시글 데이터 가져오기 (로그인 된 경우에만 요청)
   const {
     data: postsData,
     isLoading: isPostsLoading,
@@ -77,11 +83,25 @@ const BlogSection = () => {
       });
 
       if (result.error) {
-        toast.error(result.error);
+        // 로그인 관련 에러는 표시하지 않음
+        if (result.error !== "로그인이 필요한 서비스입니다.") {
+          toast.error(result.error);
+        }
         throw new Error(result.error);
       }
 
       return result.data;
+    },
+    // 로그인된 경우에만 요청 실행
+    enabled: isLoggedIn,
+    // 에러 재시도 제한
+    retry: (failureCount, error) => {
+      // 로그인 관련 에러는 재시도하지 않음
+      if (error.message === "로그인이 필요한 서비스입니다.") {
+        return false;
+      }
+      // 다른 에러는 최대 1번만 재시도
+      return failureCount < 1;
     },
   });
 
@@ -94,25 +114,38 @@ const BlogSection = () => {
     setCurrentPage(1);
   }, [searchParams]);
 
-  const handleSearch = (query: string) => { 
+  const handleSearch = (query: string) => {
     setSearchQuery(query);
     setCurrentPage(1);
 
     const params = new URLSearchParams(searchParams);
-    if (query) { 
+    if (query) {
       params.set("query", query);
-    } else { 
+    } else {
       params.delete("query");
     }
 
     router.push(`/?${params.toString()}`);
-  }
+  };
 
   // 페이지 변경 핸들러
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  // 로그인 안내 컴포넌트
+  const LoginPrompt = () => (
+    <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-12 text-center">
+      <p className="mb-4 text-lg text-gray-600">로그인 후 게시글을 확인하실 수 있습니다.</p>
+      <Link
+        href="/signin"
+        className="rounded-lg bg-orange-500 px-6 py-2.5 font-semibold text-white shadow-sm transition-all hover:bg-orange-600"
+      >
+        로그인하기
+      </Link>
+    </div>
+  );
 
   return (
     <div className="flex flex-col space-y-6">
@@ -124,18 +157,28 @@ const BlogSection = () => {
       {/* 카테고리 목록 */}
       <BlogCategoryList categories={categories} activeCategory={activeCategory} isLoading={isCategoriesLoading} />
 
-      {/* 게시글 목록 */}
-      <BlogPostList
-        postsData={postsData || null}
-        isPostsLoading={isPostsLoading}
-        isPostsError={isPostsError}
-        activeCategory={activeCategory}
-        categories={categories}
-      />
+      {/* 게시글 목록 또는 로그인 안내 */}
+      {!isLoggedIn ? (
+        <LoginPrompt />
+      ) : (
+        <>
+          <BlogPostList
+            postsData={postsData || null}
+            isPostsLoading={isPostsLoading}
+            isPostsError={isPostsError}
+            activeCategory={activeCategory}
+            categories={categories}
+          />
 
-      {/* 페이지네이션 */}
-      {!isPostsLoading && postsData && postsData.data.length > 0 && (
-        <BlogPagination currentPage={currentPage} totalPages={postsData.pageCnt || 1} onPageChange={handlePageChange} />
+          {/* 페이지네이션 */}
+          {!isPostsLoading && postsData && postsData.data.length > 0 && (
+            <BlogPagination
+              currentPage={currentPage}
+              totalPages={postsData.pageCnt || 1}
+              onPageChange={handlePageChange}
+            />
+          )}
+        </>
       )}
     </div>
   );
