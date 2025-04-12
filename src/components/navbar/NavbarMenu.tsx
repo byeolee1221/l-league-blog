@@ -25,23 +25,23 @@ const NavbarMenu = () => {
   const categoryItems = [
     {
       title: "일상생활",
-      href: "/posts/daily-life",
+      href: "/?category=1",
     },
     {
       title: "맛집소개",
-      href: "/posts/restaurant-introduction",
+      href: "/?category=2",
     },
     {
       title: "제품후기",
-      href: "/posts/product-review",
+      href: "/?category=3",
     },
     {
       title: "IT정보",
-      href: "/posts/it-information",
+      href: "/?category=4",
     },
     {
       title: "기타",
-      href: "/posts/etc",
+      href: "/?category=5",
     },
   ];
 
