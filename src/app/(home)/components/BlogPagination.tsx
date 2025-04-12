@@ -31,6 +31,7 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
             "flex size-8 items-center justify-center rounded-full text-sm",
             currentPage === page ? "bg-orange-500 font-medium text-white" : "text-gray-700 hover:bg-gray-100",
           )}
+          aria-label={`현재 페이지: ${page}`}
         >
           {page}
         </button>

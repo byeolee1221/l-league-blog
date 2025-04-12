@@ -24,10 +24,6 @@ const NavbarMenu = () => {
   // 카테고리탭 서브메뉴 아이템
   const categoryItems = [
     {
-      title: "전체",
-      href: "/posts",
-    },
-    {
       title: "일상생활",
       href: "/posts/daily-life",
     },
@@ -42,6 +38,10 @@ const NavbarMenu = () => {
     {
       title: "IT정보",
       href: "/posts/it-information",
+    },
+    {
+      title: "기타",
+      href: "/posts/etc",
     },
   ];
 
