@@ -17,8 +17,8 @@ export const writePostAction = async (prevState: unknown, formData: FormData) =>
     const title = formData.get("title") as string;
     const categoryId = formData.get("categoryId") as string;
     const content = formData.get("content") as string;
-    const mainImage = formData.get("mainImage") as File;
-    const subImage = formData.get("subImage") as File;
+    const mainImageBase64 = formData.get("mainImageBase64") as string;
+    const subImageBase64 = formData.get("subImageBase64") as string | null;
     const agreedToTermsString = formData.get("agreedToTerms") as string;
 
     // 문자열을 불리언으로 변환
@@ -37,13 +37,12 @@ export const writePostAction = async (prevState: unknown, formData: FormData) =>
     }
 
     // 이미지 검증
-    if (!mainImage || mainImage.size === 0) {
+    if (!mainImageBase64) {
       return { error: { mainImage: "대표사진을 등록해주세요." } };
     }
 
     // 1. 메인 이미지 업로드
-    const mainImageName = `blog_main_${Date.now()}_${mainImage.name}`;
-    const mainImageResult = await uploadImage(mainImage, mainImageName);
+    const mainImageResult = await uploadImage(mainImageBase64);
 
     // 업로드 결과가 에러인지 확인
     if ("error" in mainImageResult) {
@@ -52,16 +51,15 @@ export const writePostAction = async (prevState: unknown, formData: FormData) =>
 
     // 2. 서브 이미지 업로드 (있는 경우에만)
     let subImageURL = null;
-    if (subImage && subImage.size > 0) {
-      const subImageName = `blog_sub_${Date.now()}_${subImage.name}`;
-      const subImageResult = await uploadImage(subImage, subImageName);
+    if (subImageBase64) {
+      const subImageResult = await uploadImage(subImageBase64);
 
       // 업로드 결과가 에러인지 확인
       if ("error" in subImageResult) {
         return { error: { subImage: subImageResult.error } };
       }
 
-      subImageURL = subImageResult.imageURL;
+      subImageURL = subImageResult.uploadURL;
     }
 
     // 3. API에 전송할 데이터 준비 (검증된 데이터 사용)
@@ -69,7 +67,7 @@ export const writePostAction = async (prevState: unknown, formData: FormData) =>
       title: validationResult.data.title,
       category: parseInt(validationResult.data.categoryId),
       content: validationResult.data.content,
-      main_Image: mainImageResult.imageURL,
+      main_Image: mainImageResult.uploadURL,
       sub_Image: subImageURL,
     };
 

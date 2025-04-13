@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,6 +26,7 @@ const categories = [
 // 이미지 정보를 관리하는 타입
 interface ImageInfo {
   file: File | null;
+  base64: string | null;
   preview: string | null;
 }
 
@@ -54,8 +55,8 @@ const WritePost = () => {
     main: ImageInfo;
     sub: ImageInfo;
   }>({
-    main: { file: null, preview: null },
-    sub: { file: null, preview: null },
+    main: { file: null, base64: null, preview: null },
+    sub: { file: null, base64: null, preview: null },
   });
 
   const title = watch("title");
@@ -64,30 +65,28 @@ const WritePost = () => {
   const categoryId = watch("categoryId");
 
   // 이미지 핸들러
-  const handleImageChange = (type: "main" | "sub") => (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImages((prev) => ({
-        ...prev,
-        [type]: {
-          file,
-          preview: URL.createObjectURL(file),
-        },
-      }));
-    }
+  const handleImageChange = (type: "main" | "sub") => (file: File, base64: string, preview: string) => {
+    setImages((prev) => ({
+      ...prev,
+      [type]: {
+        file,
+        base64,
+        preview,
+      }
+    }))
   };
 
   // 이미지 취소 핸들러
   const handleImageClear = (type: "main" | "sub") => () => {
     setImages((prev) => ({
       ...prev,
-      [type]: { file: null, preview: null },
+      [type]: { file: null, base64: null, preview: null },
     }));
   };
 
   // 폼 제출 핸들러
   const onSubmit = async (data: FormValues) => {
-    if (!images.main.file) {
+    if (!images.main.file || !images.main.base64) {
       toast.error("대표사진을 등록해주세요");
       return;
     }
@@ -102,8 +101,10 @@ const WritePost = () => {
       });
 
       // 이미지 파일 추가
-      if (images.main.file) formData.append("mainImage", images.main.file);
-      if (images.sub.file) formData.append("subImage", images.sub.file);
+      formData.append("mainImageBase64", images.main.base64);
+      if (images.sub.base64) {
+        formData.append("subImageBase64", images.sub.base64);
+      }
 
       const result = await writePostAction(null, formData);
 
@@ -111,8 +112,8 @@ const WritePost = () => {
         toast.success("게시글이 성공적으로 등록되었습니다");
         reset();
         setImages({
-          main: { file: null, preview: null },
-          sub: { file: null, preview: null },
+          main: { file: null, base64: null, preview: null },
+          sub: { file: null, base64: null, preview: null },
         });
         router.push(`/posts/${result.categoryId}/${result.postId}`);
       } else if (result.error) {

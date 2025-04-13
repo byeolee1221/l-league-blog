@@ -8,7 +8,7 @@ interface ImageUploaderProps {
   labelText: string;
   isRequired?: boolean;
   errorMessage?: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange: (file: File, base64: string, preview: string) => void;
   onClear: () => void;
   imagePreview: string | null;
 }
@@ -29,8 +29,18 @@ const ImageUploader = ({
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    // base64 변환 없이 바로 onChange 호출
-    onChange(e);
+    const file = e.target.files?.[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        const preview = URL.createObjectURL(file);
+
+        onChange(file, base64String, preview);
+      }
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -54,7 +64,6 @@ const ImageUploader = ({
             <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
               <span className="rounded-md bg-white/80 px-2 py-1 text-xs font-medium">변경하기</span>
             </div>
-
             <button
               type="button"
               onClick={(e) => {

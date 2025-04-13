@@ -3,8 +3,8 @@ import ImageUploader from "./ImageUploader";
 interface ImageUploaderSectionProps {
   mainImagePreview: string | null;
   subImagePreview: string | null;
-  onMainImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onMainImageChange: (file: File, base64: string, preview: string) => void;
+  onSubImageChange: (file: File, base64: string, preview: string) => void;
   onMainImageClear: () => void;
   onSubImageClear: () => void;
   mainImageError?: string;
