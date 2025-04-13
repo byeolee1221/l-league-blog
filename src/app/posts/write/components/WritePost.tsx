@@ -115,7 +115,7 @@ const WritePost = () => {
           main: { file: null, base64: null, preview: null },
           sub: { file: null, base64: null, preview: null },
         });
-        router.push(`/posts/${result.categoryId}/${result.postId}`);
+        router.replace(`/posts/${result.categoryId}/${result.postId}`);
       } else if (result.error) {
         if (typeof result.error === "string") {
           toast.error(result.error);
