@@ -41,17 +41,17 @@ interface WritePostProps {
 const WritePost = ({ postId }: WritePostProps = {}) => {
   const isEditMode = !!postId;
   const router = useRouter();
-  const [isPending, setIsPending] = useState(false);
   const [isEditing, setIsEditing] = useState(isEditMode);
 
   const {
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting, submitCount },
     setValue,
     watch,
     reset,
   } = useForm<FormValues>({
     resolver: zodResolver(WritePostSchema),
+    mode: "onSubmit",
     defaultValues: {
       title: "",
       content: "",
@@ -145,8 +145,6 @@ const WritePost = ({ postId }: WritePostProps = {}) => {
       return;
     }
 
-    setIsPending(true);
-
     try {
       const formData = new FormData();
 
@@ -200,8 +198,6 @@ const WritePost = ({ postId }: WritePostProps = {}) => {
     } catch (error) {
       console.error("게시글 등록 중 오류가 발생했습니다:", error);
       toast.error("게시글 등록 중 오류가 발생했습니다");
-    } finally {
-      setIsPending(false);
     }
   };
 
@@ -231,7 +227,9 @@ const WritePost = ({ postId }: WritePostProps = {}) => {
           onSubImageChange={handleImageChange("sub")}
           onMainImageClear={handleImageClear("main")}
           onSubImageClear={handleImageClear("sub")}
-          mainImageError={!images.main.preview && !images.main.file ? "대표사진을 등록해주세요" : undefined}
+          mainImageError={
+            submitCount > 0 && !images.main.preview && !images.main.file ? "대표사진을 등록해주세요" : undefined
+          }
         />
 
         {/* 카테고리 선택 */}
@@ -257,7 +255,7 @@ const WritePost = ({ postId }: WritePostProps = {}) => {
         />
 
         {/* 제출 버튼 */}
-        <SubmitButton isPending={isPending} label={isEditMode ? "수정하기" : "등록하기"} />
+        <SubmitButton isSubmitting={isSubmitting} label={isEditMode ? "수정하기" : "등록하기"} />
       </form>
     </div>
   );
