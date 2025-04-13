@@ -1,5 +1,6 @@
 "use client";
 
+import { getListIcon } from "@/lib/iconMapping";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -53,10 +54,10 @@ const PostImages = ({ mainImage, subImage }: PostImagesProps) => {
           <div className="relative h-screen w-screen">
             <Image src={currentImage} alt="전체화면 이미지" fill className="object-contain" sizes="100vw" />
             <button
-              className="absolute top-4 right-4 rounded-full bg-white/20 p-2 text-white"
+              className="absolute top-4 right-4 cursor-pointer rounded-full bg-white/20 p-2 text-white"
               onClick={() => setIsFullScreen(false)}
             >
-              닫기
+              {getListIcon("x", "size-6")}
             </button>
           </div>
         </div>

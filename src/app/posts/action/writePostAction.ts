@@ -59,7 +59,7 @@ export const writePostAction = async (prevState: unknown, formData: FormData) =>
         return { error: { subImage: subImageResult.error } };
       }
 
-      subImageURL = subImageResult.uploadURL;
+      subImageURL = subImageResult.imageURL;
     }
 
     // 3. API에 전송할 데이터 준비 (검증된 데이터 사용)
@@ -67,8 +67,8 @@ export const writePostAction = async (prevState: unknown, formData: FormData) =>
       title: validationResult.data.title,
       category: parseInt(validationResult.data.categoryId),
       content: validationResult.data.content,
-      main_Image: mainImageResult.uploadURL,
-      sub_Image: subImageURL,
+      main_image: mainImageResult.imageURL,
+      sub_image: subImageURL,
     };
 
     // 4. 게시글 등록 API 요청

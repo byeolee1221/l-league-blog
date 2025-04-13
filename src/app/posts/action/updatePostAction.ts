@@ -62,7 +62,7 @@ export const updatePostAction = async (prevState: unknown, formData: FormData) =
         return { error: { mainImage: mainImageResult.error } };
       }
 
-      mainImageUploadURL = mainImageResult.uploadURL;
+      mainImageUploadURL = mainImageResult.imageURL;
     }
 
     // 서브 이미지 처리 (있는 경우에만)
@@ -75,7 +75,7 @@ export const updatePostAction = async (prevState: unknown, formData: FormData) =
         return { error: { subImage: subImageResult.error } };
       }
 
-      subImageUploadURL = subImageResult.uploadURL;
+      subImageUploadURL = subImageResult.imageURL;
     }
 
     // API에 전송할 데이터 준비
@@ -83,8 +83,8 @@ export const updatePostAction = async (prevState: unknown, formData: FormData) =
       title: validationResult.data.title,
       category: parseInt(validationResult.data.categoryId),
       content: validationResult.data.content,
-      main_Image: mainImageUploadURL,
-      sub_Image: subImageUploadURL,
+      main_image: mainImageUploadURL,
+      sub_image: subImageUploadURL,
     };
 
     // 게시글 수정 API 요청
