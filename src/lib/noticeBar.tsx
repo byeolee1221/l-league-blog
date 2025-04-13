@@ -14,7 +14,7 @@ export const NoticeBar = ({ description, isNoticeString }: NoticeBarProps) => {
         </div>
         {isNoticeString && <span className="whitespace-nowrap">공지</span>}
       </div>
-      <p className="ml-4 text-xs font-medium md:text-sm">{description}</p>
+      <p className="ml-4 text-xs font-medium whitespace-nowrap md:text-sm">{description}</p>
     </div>
   );
 };

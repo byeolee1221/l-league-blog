@@ -7,6 +7,8 @@ import Image from "next/image";
 import { cn } from "@/lib/tailwindMerge";
 import { getListIcon } from "@/lib/iconMapping";
 import { useNavbarConfig } from "@/hooks/useNavbarConfig";
+import { logoutAction } from "@/action/logoutAction";
+import toast from "react-hot-toast";
 
 const NavbarContents = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
   const [isMobileTipOpen, setIsMobileTipOpen] = useState(false);
@@ -16,6 +18,23 @@ const NavbarContents = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
     setIsMobileTipOpen(!isMobileTipOpen);
   };
 
+  const handleLogout = async () => { 
+    try {
+      const result = await logoutAction();
+
+      if (result.success) { 
+        toast.success("로그아웃되었습니다.");
+        window.location.href = "/";
+      } else {
+        if (result.error) {
+          toast.error(result.error);
+        }
+      }
+    } catch (error) {
+      console.error("로그아웃 처리 중 오류 발생", error);
+      toast.error("로그아웃 처리 중 오류가 발생했습니다.");
+    }
+  }
 
   return (
     <div className="relative mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 transition-all md:h-[70px] md:px-6 lg:h-[76px] lg:px-8">
@@ -57,7 +76,10 @@ const NavbarContents = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
       {config.showAuthButtons && (
         <div className={cn("hidden lg:block", config.type === "editor" ? "lg:block" : "")}>
           {isLoggedIn ? (
-            <button className="cursor-pointer rounded-full px-5 py-2 text-base font-semibold transition-all hover:shadow-sm">
+            <button 
+              onClick={handleLogout}
+              className="cursor-pointer rounded-full px-5 py-2 text-base font-semibold transition-all hover:shadow-sm"
+            >
               로그아웃
             </button>
           ) : (
