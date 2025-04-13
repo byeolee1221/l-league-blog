@@ -2,9 +2,10 @@ import { getListIcon } from "@/lib/iconMapping";
 
 interface SubmitButtonProps {
   isPending: boolean;
+  label: string;
 }
 
-const SubmitButton = ({ isPending }: SubmitButtonProps) => {
+const SubmitButton = ({ isPending, label }: SubmitButtonProps) => {
   return (
     <button
       type="submit"
@@ -16,7 +17,7 @@ const SubmitButton = ({ isPending }: SubmitButtonProps) => {
           {getListIcon("spinner", "size-5 sm:size-6 animate-spin")}
         </span>
       ) : (
-        "제출"
+        label
       )}
     </button>
   );

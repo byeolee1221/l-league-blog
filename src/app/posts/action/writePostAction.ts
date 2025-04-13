@@ -81,9 +81,7 @@ export const writePostAction = async (prevState: unknown, formData: FormData) =>
       body: JSON.stringify(postData),
     });
 
-    // 응답 처리
     if (!response.ok) {
-      // 에러 응답 처리
       try {
         const errorData = await response.json();
         return {

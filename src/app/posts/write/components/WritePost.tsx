@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +14,8 @@ import ImageUploaderSection from "./ImageUploaderSection";
 import AgreeToTerms from "./AgreeToTerms";
 import SubmitButton from "./SubmitButton";
 import { z } from "zod";
+import { getPostDetail } from "../../[category]/[id]/action/getPostDetail";
+import { updatePostAction } from "../../action/updatePostAction";
 
 const categories = [
   { id: 1, name: "일상생활" },
@@ -32,9 +34,16 @@ interface ImageInfo {
 
 type FormValues = z.infer<typeof WritePostSchema>;
 
-const WritePost = () => {
+interface WritePostProps { 
+  postId?: number;
+}
+
+const WritePost = ({ postId }: WritePostProps = {}) => {
+  const isEditMode = !!postId;
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
+  const [isEditing, setIsEditing] = useState(isEditMode);
+
   const {
     handleSubmit,
     formState: { errors },
@@ -47,7 +56,7 @@ const WritePost = () => {
       title: "",
       content: "",
       categoryId: "",
-      agreedToTerms: false,
+      agreedToTerms: isEditMode ? true : false,
     },
   });
 
@@ -63,6 +72,50 @@ const WritePost = () => {
   const content = watch("content");
   const agreedToTerms = watch("agreedToTerms");
   const categoryId = watch("categoryId");
+
+  useEffect(() => {
+    if (isEditMode && postId) {
+      const fetchPostData = async () => { 
+        try {
+          const data = await getPostDetail(postId);
+
+          if (data.success) { 
+            const postData = data.data;
+
+            setValue("title", postData.title);
+            setValue("content", postData.content);
+            setValue("categoryId", postData.category.id.toString());
+            setValue("agreedToTerms", true);
+
+            setImages({
+              main: {
+                file: null,
+                base64: null,
+                preview: postData.main_image || null,
+              },
+              sub: {
+                file: null,
+                base64: null,
+                preview: postData.sub_image || null,
+              }
+            });
+          } else {
+            toast.error(data.error);
+          }
+        } catch (error) {
+          console.error("게시글 불러오기 실패:", error);
+          toast.error("게시글 데이터를 불러오는데 실패했습니다.");
+          router.push("/");
+        } finally {
+          setIsEditing(false);
+        }
+      }
+
+      fetchPostData();
+    } else {
+      setIsEditing(false);
+    }
+  }, [isEditMode, postId, setValue, router]);
 
   // 이미지 핸들러
   const handleImageChange = (type: "main" | "sub") => (file: File, base64: string, preview: string) => {
@@ -86,7 +139,7 @@ const WritePost = () => {
 
   // 폼 제출 핸들러
   const onSubmit = async (data: FormValues) => {
-    if (!images.main.file || !images.main.base64) {
+    if (!images.main.file || !images.main.base64 && !images.main.preview) {
       toast.error("대표사진을 등록해주세요");
       return;
     }
@@ -101,20 +154,34 @@ const WritePost = () => {
       });
 
       // 이미지 파일 추가
-      formData.append("mainImageBase64", images.main.base64);
-      if (images.sub.base64) {
-        formData.append("subImageBase64", images.sub.base64);
+      if (images.main.base64) {
+        formData.append("mainImageBase64", images.main.base64);
+      } else if (isEditMode && images.main.preview) {
+        formData.append("mainImageBase64", images.main.preview);
       }
 
-      const result = await writePostAction(null, formData);
+      if (images.sub.base64) {
+        formData.append("subImageBase64", images.sub.base64);
+      } else if (isEditMode && images.sub.preview) {
+        formData.append("subImageBase64", images.sub.preview);
+      }
+
+      if (isEditMode && postId) {
+        formData.append("postId", postId.toString());
+      }
+
+      const result = isEditMode ? await updatePostAction(null, formData) : await writePostAction(null, formData);
 
       if (result.success) {
-        toast.success("게시글이 성공적으로 등록되었습니다");
-        reset();
-        setImages({
-          main: { file: null, base64: null, preview: null },
-          sub: { file: null, base64: null, preview: null },
-        });
+        toast.success(isEditMode ? "게시글이 수정되었습니다" : "게시글이 등록되었습니다");
+        if (!isEditMode) {
+          reset();
+          setImages({
+            main: { file: null, base64: null, preview: null },
+            sub: { file: null, base64: null, preview: null },
+          });
+        }
+
         router.replace(`/posts/${result.categoryId}/${result.postId}`);
       } else if (result.error) {
         if (typeof result.error === "string") {
@@ -132,6 +199,18 @@ const WritePost = () => {
     }
   };
 
+  // 로딩 상태 표시
+  if (isEditing) {
+    return (
+      <div className="flex flex-col space-y-4">
+        <div className="h-10 w-3/4 animate-pulse rounded bg-gray-200" />
+        <div className="h-64 w-full animate-pulse rounded bg-gray-200" />
+        <div className="h-10 w-1/2 animate-pulse rounded bg-gray-200" />
+        <div className="h-32 w-full animate-pulse rounded bg-gray-200" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col space-y-6">
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col space-y-6">
@@ -146,7 +225,7 @@ const WritePost = () => {
           onSubImageChange={handleImageChange("sub")}
           onMainImageClear={handleImageClear("main")}
           onSubImageClear={handleImageClear("sub")}
-          mainImageError={!images.main.file ? "대표사진을 등록해주세요" : undefined}
+          mainImageError={!images.main.preview && !images.main.file ? "대표사진을 등록해주세요" : undefined}
         />
 
         {/* 카테고리 선택 */}
@@ -172,7 +251,7 @@ const WritePost = () => {
         />
 
         {/* 제출 버튼 */}
-        <SubmitButton isPending={isPending} />
+        <SubmitButton isPending={isPending} label={isEditMode ? "수정하기" : "등록하기"} />
       </form>
     </div>
   );
