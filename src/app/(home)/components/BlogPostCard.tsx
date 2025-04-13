@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { deletePost } from "../action/deletePost";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface BlogPostCardProps {
   post: PostData;
@@ -17,6 +19,7 @@ const BlogPostCard = ({ post, categoryName, isOwner = false }: BlogPostCardProps
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // 메뉴 외부 클릭 감지
   useEffect(() => {
@@ -46,10 +49,20 @@ const BlogPostCard = ({ post, categoryName, isOwner = false }: BlogPostCardProps
 
     if (confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
       try {
-        // 삭제 API 호출 등 구현
-        // const response = await deletePost(post.id);
-        toast.success("게시글이 삭제되었습니다.");
-        router.refresh();
+        if (!post.id) {
+          toast.error("게시글을 찾을 수 없습니다.");
+          return;
+        }
+
+        const response = await deletePost(post.id);
+
+        if (response.success) {
+          toast.success("게시글이 삭제되었습니다.");
+          queryClient.invalidateQueries({ queryKey: ["posts"] });
+          router.refresh();
+        } else {
+          toast.error(response.error);
+        }
       } catch (error) {
         console.error("게시글 삭제 중 오류 발생", error);
         toast.error("게시글 삭제 중 오류가 발생했습니다.");
