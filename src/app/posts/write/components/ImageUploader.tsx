@@ -60,6 +60,7 @@ const ImageUploader = ({
               fill
               className="object-cover"
               sizes="(max-width: 640px) 100vw, 300px"
+              priority
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
               <span className="rounded-md bg-white/80 px-2 py-1 text-xs font-medium">변경하기</span>

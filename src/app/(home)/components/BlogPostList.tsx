@@ -12,7 +12,14 @@ interface BlogPostListProps {
   isOwner: boolean;
 }
 
-const BlogPostList = ({ postsData, isPostsLoading, isPostsError, activeCategory, categories, isOwner }: BlogPostListProps) => {
+const BlogPostList = ({
+  postsData,
+  isPostsLoading,
+  isPostsError,
+  activeCategory,
+  categories,
+  isOwner,
+}: BlogPostListProps) => {
   const activeCategoryName = categories.data.find((c) => c.id === activeCategory)?.name || "";
 
   return (
@@ -31,8 +38,8 @@ const BlogPostList = ({ postsData, isPostsLoading, isPostsError, activeCategory,
       ) : isPostsError || !postsData || postsData.data.length === 0 ? (
         // 에러 또는 데이터 없음
         <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
-          <div className="mb-4 rounded-full bg-gray-100 p-4">
-            <Image src="/icons/icon_tip.svg" alt="정보 없음" width={32} height={32} className="opacity-50" />
+          <div className="relative mb-4 flex size-12 items-center justify-center rounded-full bg-gray-100 p-4">
+            <Image src="/icons/icon_tip.svg" alt="정보 없음" fill className="object-contain opacity-50" />
           </div>
           <h3 className="mb-2 text-lg font-medium text-gray-700">게시글이 없습니다</h3>
           <p className="text-sm text-gray-500">{activeCategoryName} 카테고리에 게시된 글이 없습니다.</p>
@@ -40,7 +47,12 @@ const BlogPostList = ({ postsData, isPostsLoading, isPostsError, activeCategory,
       ) : (
         // 게시글 목록 표시
         postsData.data.map((post) => (
-          <BlogPostCard key={post.id} post={post} categoryName={post.category.name || activeCategoryName} isOwner={isOwner} />
+          <BlogPostCard
+            key={post.id}
+            post={post}
+            categoryName={post.category.name || activeCategoryName}
+            isOwner={isOwner}
+          />
         ))
       )}
     </div>

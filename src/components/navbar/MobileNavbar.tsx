@@ -42,7 +42,12 @@ const MobileNavbar = () => {
   ];
 
   return (
-    <div className={cn("fixed right-0 bottom-0 left-0 z-50 border-t border-gray-200 bg-white lg:hidden", showMobileNavbar ? "block" : "hidden")}>
+    <div
+      className={cn(
+        "fixed right-0 bottom-0 left-0 z-50 border-t border-gray-200 bg-white lg:hidden",
+        showMobileNavbar ? "block" : "hidden",
+      )}
+    >
       <div className="flex h-16 items-center justify-around">
         {navItems.map((item) => (
           <Link
@@ -58,7 +63,7 @@ const MobileNavbar = () => {
               alt={item.label}
               width={24}
               height={24}
-              className={cn(pathname === item.href ? "text-orange-500 opacity-100" : "opacity-70")}
+              className={cn("size-6", pathname === item.href ? "text-orange-500 opacity-100" : "opacity-70")}
             />
             <span className="text-xs font-medium">{item.label}</span>
           </Link>
