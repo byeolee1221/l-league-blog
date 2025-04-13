@@ -52,10 +52,10 @@ export const updatePostAction = async (prevState: unknown, formData: FormData) =
       return { error: { mainImage: "대표사진을 등록해주세요." } };
     }
 
-    // 메인 이미지 처리 (새 이미지이거나 기존 URL 사용)
-    let mainImageUploadURL = mainImageUrl;
+    // 메인 이미지 처리 (새 이미지가 있는 경우에만 업로드)
+    let mainImageUploadURL = mainImageUrl; // 기존 이미지 URL
     if (mainImageBase64) {
-      // 새 이미지가 업로드된 경우
+      // 새 이미지가 업로드된 경우에만 실행
       const mainImageResult = await uploadImage(mainImageBase64);
 
       if ("error" in mainImageResult) {

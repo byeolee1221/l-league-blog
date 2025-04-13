@@ -34,7 +34,7 @@ interface ImageInfo {
 
 type FormValues = z.infer<typeof WritePostSchema>;
 
-interface WritePostProps { 
+interface WritePostProps {
   postId?: number;
 }
 
@@ -75,11 +75,11 @@ const WritePost = ({ postId }: WritePostProps = {}) => {
 
   useEffect(() => {
     if (isEditMode && postId) {
-      const fetchPostData = async () => { 
+      const fetchPostData = async () => {
         try {
           const data = await getPostDetail(postId);
 
-          if (data.success) { 
+          if (data.success) {
             const postData = data.data;
 
             setValue("title", postData.title);
@@ -97,7 +97,7 @@ const WritePost = ({ postId }: WritePostProps = {}) => {
                 file: null,
                 base64: null,
                 preview: postData.sub_image || null,
-              }
+              },
             });
           } else {
             toast.error(data.error);
@@ -109,7 +109,7 @@ const WritePost = ({ postId }: WritePostProps = {}) => {
         } finally {
           setIsEditing(false);
         }
-      }
+      };
 
       fetchPostData();
     } else {
@@ -125,8 +125,8 @@ const WritePost = ({ postId }: WritePostProps = {}) => {
         file,
         base64,
         preview,
-      }
-    }))
+      },
+    }));
   };
 
   // 이미지 취소 핸들러
@@ -150,21 +150,26 @@ const WritePost = ({ postId }: WritePostProps = {}) => {
     try {
       const formData = new FormData();
 
+      // 기본 데이터 추가
       Object.entries(data).forEach(([key, value]) => {
         formData.append(key, typeof value === "boolean" ? value.toString() : value);
       });
 
-      // 이미지 파일 추가
+      // 이미지 파일 추가 (변경된 경우만)
       if (images.main.base64) {
+        // 새로 업로드한 이미지가 있는 경우
         formData.append("mainImageBase64", images.main.base64);
       } else if (isEditMode && images.main.preview) {
-        formData.append("mainImageBase64", images.main.preview);
+        // 수정 모드에서 기존 이미지 URL이 있는 경우
+        formData.append("mainImageUrl", images.main.preview);
       }
 
       if (images.sub.base64) {
+        // 새로 업로드한 서브 이미지가 있는 경우
         formData.append("subImageBase64", images.sub.base64);
       } else if (isEditMode && images.sub.preview) {
-        formData.append("subImageBase64", images.sub.preview);
+        // 수정 모드에서 기존 서브 이미지 URL이 있는 경우
+        formData.append("subImageUrl", images.sub.preview);
       }
 
       if (isEditMode && postId) {
