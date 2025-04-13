@@ -10,7 +10,7 @@ interface BlogPostCardProps {
 const BlogPostCard = ({ post, categoryName }: BlogPostCardProps) => {
   return (
     <Link
-      href={`/posts/${post.id}`}
+      href={`/posts/category-${post.category.id}/${post.id}`}
       className="group flex flex-col overflow-hidden rounded-lg border border-gray-200 transition-all hover:shadow-md"
     >
       {post.main_image && (
