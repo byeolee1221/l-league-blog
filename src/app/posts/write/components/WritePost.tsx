@@ -139,7 +139,8 @@ const WritePost = ({ postId }: WritePostProps = {}) => {
 
   // 폼 제출 핸들러
   const onSubmit = async (data: FormValues) => {
-    if (!images.main.file || !images.main.base64 && !images.main.preview) {
+    const hasNoMainImage = !images.main.file && !images.main.base64 && !images.main.preview;
+    if (hasNoMainImage) {
       toast.error("대표사진을 등록해주세요");
       return;
     }
