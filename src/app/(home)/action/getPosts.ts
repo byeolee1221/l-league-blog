@@ -53,7 +53,7 @@ export const getPosts = async ({ category_id = 1, category_name, title, page = 1
     }
 
     const result = await response.json();
-
+    
     return { success: true, data: result };
   } catch (error) {
     console.error("게시글 불러오기 중 오류 발생:", error);

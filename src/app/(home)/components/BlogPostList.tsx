@@ -9,9 +9,10 @@ interface BlogPostListProps {
   isPostsError: boolean;
   activeCategory: number;
   categories: Category;
+  isOwner: boolean;
 }
 
-const BlogPostList = ({ postsData, isPostsLoading, isPostsError, activeCategory, categories }: BlogPostListProps) => {
+const BlogPostList = ({ postsData, isPostsLoading, isPostsError, activeCategory, categories, isOwner }: BlogPostListProps) => {
   const activeCategoryName = categories.data.find((c) => c.id === activeCategory)?.name || "";
 
   return (
@@ -39,7 +40,7 @@ const BlogPostList = ({ postsData, isPostsLoading, isPostsError, activeCategory,
       ) : (
         // 게시글 목록 표시
         postsData.data.map((post) => (
-          <BlogPostCard key={post.id} post={post} categoryName={post.category.name || activeCategoryName} />
+          <BlogPostCard key={post.id} post={post} categoryName={post.category.name || activeCategoryName} isOwner={isOwner} />
         ))
       )}
     </div>

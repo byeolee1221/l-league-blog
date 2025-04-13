@@ -59,6 +59,14 @@ const BlogSection = ({ isLoggedIn }: BlogSectionProps) => {
   const [activeCategory, setActiveCategory] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isOwner, setIsOwner] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const ownerStatus = localStorage.getItem("isOwner") === "true";
+      setIsOwner(ownerStatus);
+    }
+  }, []);
 
   // 카테고리 데이터 가져오기
   const { data: categories, isLoading: isCategoriesLoading } = useQuery<Category>({
@@ -168,6 +176,7 @@ const BlogSection = ({ isLoggedIn }: BlogSectionProps) => {
             isPostsError={isPostsError}
             activeCategory={activeCategory}
             categories={categories}
+            isOwner={isOwner}
           />
 
           {/* 페이지네이션 */}

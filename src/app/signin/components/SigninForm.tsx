@@ -18,6 +18,9 @@ const SigninForm = () => {
 
   useEffect(() => {
     if (state?.success) {
+      if (state.isOwner !== undefined) { 
+        localStorage.setItem("isOwner", state.isOwner.toString());
+      }
       toast.success("로그인에 성공했습니다.");
       router.push("/");
     } else if (state?.error) {

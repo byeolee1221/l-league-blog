@@ -76,7 +76,9 @@ export const signinAction = async (prevState: unknown, formData: FormData) => {
       sameSite: "strict",
     });
 
-    return { success: true };
+    const isOwner = data.email === process.env.OWNER_EMAIL;
+
+    return { success: true, isOwner };
   } catch (error) {
     console.error("로그인 처리 중 오류 발생:", error);
     return { error: "로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요." };
