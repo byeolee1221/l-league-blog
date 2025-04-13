@@ -19,6 +19,18 @@ const NavbarMenu = () => {
       hasSubmenu: true,
       onMouseEnter: () => setIsMenuOpen(true),
     },
+    {
+      label: "채팅",
+      href: "/chat",
+    },
+    {
+      label: "랭킹",
+      href: "/rank",
+    },
+    {
+      label: "프로필",
+      href: "/profile",
+    },
   ];
 
   // 카테고리탭 서브메뉴 아이템
@@ -70,7 +82,7 @@ const NavbarMenu = () => {
           className="relative"
           onMouseEnter={item.onMouseEnter}
         >
-          {item.hasSubmenu && (
+          {item.hasSubmenu ? (
             <button
               className={cn(
                 "flex items-center rounded-full px-3 py-2 text-base font-semibold transition-all hover:shadow-sm",
@@ -80,6 +92,16 @@ const NavbarMenu = () => {
               {item.label}
               {getListIcon("arrowDown", `ml-1 size-4 transition-transform ${isMenuOpen ? "rotate-180" : ""}`)}
             </button>
+          ) : (
+            <Link
+              href={item.href}
+              className={cn(
+                "flex items-center rounded-full px-3 py-2 text-base font-semibold transition-all hover:shadow-sm",
+                pathname === item.href && "text-orange-500",
+              )}
+            >
+              {item.label}
+            </Link>
           )}
           {item.hasSubmenu && (
             <AnimatePresence>
