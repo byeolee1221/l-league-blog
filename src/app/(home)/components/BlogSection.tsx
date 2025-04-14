@@ -13,7 +13,6 @@ import BlogPostList from "./BlogPostList";
 import BlogPagination from "./BlogPagination";
 import BlogSearchBar from "./BlogSearchBar";
 
-// props에 isLoggedIn 추가
 interface BlogSectionProps {
   isLoggedIn: boolean;
 }
@@ -84,7 +83,8 @@ const BlogSection = ({ isLoggedIn }: BlogSectionProps) => {
     queryKey: ["posts", activeCategory, currentPage, searchQuery],
     queryFn: async () => {
       const result = await getPosts({
-        category_id: activeCategory,
+        // 검색어가 있고 activeCategory가 0인 경우 카테고리 필터링 없이 검색
+        category_id: searchQuery && activeCategory === 0 ? undefined : activeCategory,
         page: currentPage,
         page_size: 10,
         title: searchQuery || undefined,
@@ -115,10 +115,18 @@ const BlogSection = ({ isLoggedIn }: BlogSectionProps) => {
 
   // URL의 category 파라미터로 활성 카테고리 설정
   useEffect(() => {
-    const category = searchParams.get("category") || "1";
     const query = searchParams.get("query") || "";
-    setActiveCategory(Number(category));
-    setSearchQuery(query);
+
+    // 검색어가 있으면 전체 카테고리(0)로 설정
+    if (query) {
+      setActiveCategory(0);
+      setSearchQuery(query);
+    } else {
+      // 검색어가 없으면 URL의 카테고리 파라미터 사용
+      const category = searchParams.get("category") || "1";
+      setActiveCategory(Number(category));
+    }
+
     setCurrentPage(1);
   }, [searchParams]);
 
@@ -126,11 +134,16 @@ const BlogSection = ({ isLoggedIn }: BlogSectionProps) => {
     setSearchQuery(query);
     setCurrentPage(1);
 
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams();
+
+    // 검색어가 있는 경우 카테고리 파라미터를 제거하여 전체 카테고리에서 검색
     if (query) {
       params.set("query", query);
+      // 카테고리 파라미터는 설정하지 않음 (전체 검색을 위해)
+      setActiveCategory(0);
     } else {
-      params.delete("query");
+      // 검색어가 없으면 현재 활성화된 카테고리 유지
+      params.set("category", activeCategory.toString());
     }
 
     router.push(`/?${params.toString()}`);
