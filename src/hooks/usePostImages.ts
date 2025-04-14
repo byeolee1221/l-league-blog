@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 // 이미지 정보를 관리하는 타입
 export interface ImageInfo {
@@ -18,6 +18,10 @@ interface UsePostImagesProps {
 }
 
 export const usePostImages = (initialImages?: UsePostImagesProps) => {
+  // 이전 값을 저장할 ref 추가
+  const prevMainImageRef = useRef<string | null>(null);
+  const prevSubImageRef = useRef<string | null>(null);
+
   const [images, setImages] = useState<PostImages>({
     main: {
       file: null,
@@ -30,6 +34,30 @@ export const usePostImages = (initialImages?: UsePostImagesProps) => {
       preview: initialImages?.sub || null,
     },
   });
+
+  // 수정모드에서의 initialImages 정상 표출
+  useEffect(() => {
+    const mainChanged = initialImages?.main !== prevMainImageRef.current;
+    const subChanged = initialImages?.sub !== prevSubImageRef.current;
+
+    if ((initialImages?.main && mainChanged) || (initialImages?.sub && subChanged)) {
+      prevMainImageRef.current = initialImages.main;
+      prevSubImageRef.current = initialImages.sub;
+
+      setImages((prev) => ({
+        main: {
+          file: null,
+          base64: null,
+          preview: initialImages.main || prev.main.preview,
+        },
+        sub: {
+          file: null,
+          base64: null,
+          preview: initialImages.sub || prev.sub.preview,
+        },
+      }));
+    }
+  }, [initialImages]);
 
   // 이미지 핸들러
   const handleImageChange = (type: "main" | "sub") => (file: File, base64: string, preview: string) => {

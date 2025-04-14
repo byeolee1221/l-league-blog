@@ -65,7 +65,7 @@ const WritePost = ({ postId }: WritePostProps = {}) => {
 
           if (data.success) {
             setPostData(data.data);
-            resetDirty(); // 초기 데이터 로드 후 상태 리셋
+            
           } else {
             toast.error(data.error);
           }
@@ -82,7 +82,7 @@ const WritePost = ({ postId }: WritePostProps = {}) => {
     } else {
       setIsEditing(false);
     }
-  }, [isEditMode, postId, router, resetDirty]);
+  }, [isEditMode, postId, router]);
 
   // 폼 제출 핸들러
   const onSubmit = async (data: FormValues) => {
