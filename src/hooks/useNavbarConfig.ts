@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 
-export type NavbarType = "default" | "auth" | "editor" | "hidden";
+export type NavbarType = "default" | "auth" | "editor" | "detail" | "hidden";
 
 interface NavbarConfig {
   type: NavbarType;
@@ -19,6 +19,7 @@ export const useNavbarConfig = (): NavbarConfig => {
   const isEditPage = pathname.includes("/posts/edit/");
   const isWritePage = pathname === "/posts/write";
   const isAuthPage = pathname === "/signin";
+  const isPostDetailPage = /\/posts\/[^/]+\/\d+$/.test(pathname);
 
   if (isWritePage || isEditPage) {
     return {
@@ -30,6 +31,17 @@ export const useNavbarConfig = (): NavbarConfig => {
       showAuthButtons: true,
       showMobileNav: false,
     };
+  }
+
+  if (isPostDetailPage) { 
+    return {
+      type: "detail",
+      showBackButton: true,
+      showLogo: false,
+      showMenu: true,
+      showAuthButtons: true,
+      showMobileNav: true,
+    }
   }
 
   if (isAuthPage) {

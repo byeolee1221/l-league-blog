@@ -9,10 +9,15 @@ import { getListIcon } from "@/lib/iconMapping";
 import { useNavbarConfig } from "@/hooks/useNavbarConfig";
 import { logoutAction } from "@/action/logoutAction";
 import toast from "react-hot-toast";
+import { postTitleAtom } from "@/atoms/postAtom";
+import { useAtomValue } from "jotai";
+import { useRouter } from "next/navigation";
 
 const NavbarContents = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
   const [isMobileTipOpen, setIsMobileTipOpen] = useState(false);
   const config = useNavbarConfig();
+  const postTitle = useAtomValue(postTitleAtom);
+  const router = useRouter();
 
   const handleMobileTipOpen = () => {
     setIsMobileTipOpen(!isMobileTipOpen);
@@ -41,10 +46,22 @@ const NavbarContents = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
       {/* 에디터 모드 헤더 (모바일) */}
       {config.type === "editor" && (
         <div className="flex w-full items-center lg:hidden">
-          <Link href="/" className="mr-3">
+          <button onClick={() => router.back()} className="mr-3">
             {getListIcon("arrowBack", "size-6 text-gray-700")}
-          </Link>
+          </button>
           <h1 className="text-xl font-bold">{config.title}</h1>
+        </div>
+      )}
+
+      {/* 상세 페이지 헤더 - 새로 추가 */}
+      {config.type === "detail" && (
+        <div className="flex w-full items-center">
+          <button onClick={() => router.back()} className="mr-3">
+            {getListIcon("arrowBack", "size-6 text-gray-700")}
+          </button>
+          <h1 className="truncate text-lg font-medium md:max-w-md lg:max-w-lg">
+            {postTitle}
+          </h1>
         </div>
       )}
 

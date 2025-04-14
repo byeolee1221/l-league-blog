@@ -9,6 +9,8 @@ import PostHeader from "./PostHeader";
 import PostImages from "./PostImages";
 import PostContent from "./PostContent";
 import PostActionsMenu from "@/components/post/postActionsMenu";
+import { useSetAtom } from "jotai";
+import { postTitleAtom } from "@/atoms/postAtom";
 
 interface PostDetailClientProps {
   postId: number;
@@ -19,6 +21,7 @@ const PostDetailClient = ({ postId }: PostDetailClientProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
   const router = useRouter();
+  const setPostTitle = useSetAtom(postTitleAtom);
 
   useEffect(() => {
     setIsOwner(localStorage.getItem("isOwner") === "true");
@@ -32,6 +35,7 @@ const PostDetailClient = ({ postId }: PostDetailClientProps) => {
 
         if (data.success) {
           setPost(data.data);
+          setPostTitle(data.data.title);
         } else {
           toast.error(data.error);
         }
@@ -44,7 +48,7 @@ const PostDetailClient = ({ postId }: PostDetailClientProps) => {
     };
 
     fetchPostDetail();
-  }, [postId]);
+  }, [postId, setPostTitle]);
 
   if (isLoading) {
     return <PostDetailSkeleton />;

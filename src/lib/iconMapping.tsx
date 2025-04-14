@@ -7,6 +7,7 @@ import { FaSpinner, FaCheck } from "react-icons/fa";
 import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
 import { HiOutlineX } from "react-icons/hi";
 import { GoPlus } from "react-icons/go";
+import { CiImageOff } from "react-icons/ci";
 
 export type IconKey = 
   | "arrowDown"
@@ -19,6 +20,7 @@ export type IconKey =
   | "x"
   | "plus"
   | "check"
+  | "imageOff"
 
 type IconMapping = {
   [key in IconKey]: IconType;
@@ -35,6 +37,7 @@ export const iconMapping: IconMapping = {
   x: HiOutlineX,
   plus: GoPlus,
   check: FaCheck,
+  imageOff: CiImageOff,
 }
 
 export const getListIcon = (icon: IconKey, className?: string): ReactElement | null => { 

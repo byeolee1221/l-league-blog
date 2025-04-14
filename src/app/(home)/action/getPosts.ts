@@ -10,7 +10,7 @@ interface GetPostsParams {
   page_size?: number;
 }
 
-export const getPosts = async ({ category_id = 1, category_name, title, page = 1, page_size = 10 }: GetPostsParams) => {
+export const getPosts = async ({ category_id, category_name, title, page = 1, page_size = 10 }: GetPostsParams) => {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("access_token")?.value;
