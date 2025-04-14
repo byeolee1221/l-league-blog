@@ -1,42 +1,38 @@
-"use client";
-
 import { useEffect, useState } from "react";
 
 export const usePreventLeave = () => {
   const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
-    if (!isDirty) return;
+    if (isDirty) {
+      const handlePopState = () => {
+        const shouldLeave = window.confirm("작성중인 내용이 삭제됩니다.");
 
-    // 브라우저 뒤로가기 처리
-    const handlePopState = () => {
-      const confirmMessage = "작성중인 내용이 삭제됩니다. 정말 나가시겠습니까?";
+        if (shouldLeave) {
+          setIsDirty(false);
 
-      if (!window.confirm(confirmMessage)) {
-        // 취소한 경우 현재 URL 유지
-        window.history.pushState(null, "", window.location.pathname);
-      }
-    };
+          // 히스토리 문제로 인해 이벤트 리스너 먼저 제거
+          window.removeEventListener("popstate", handlePopState);
+          window.history.go(-1);
+        } else {
+          window.history.pushState(null, "", window.location.href);
+        }
+      };
 
-    // 새로고침/탭 닫기 처리
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      return "";
-    };
+      // 현재 상태를 히스토리에 추가
+      window.history.pushState(null, "", window.location.href);
 
-    // 이벤트 리스너 등록
-    window.addEventListener("popstate", handlePopState);
-    window.addEventListener("beforeunload", handleBeforeUnload);
+      // 이벤트 리스너 등록
+      window.addEventListener("popstate", handlePopState);
 
-    // 클린업
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
   }, [isDirty]);
 
   return {
-    setDirty: (dirty = true) => setIsDirty(dirty),
+    setDirty: setIsDirty,
     resetDirty: () => setIsDirty(false),
   };
 };
