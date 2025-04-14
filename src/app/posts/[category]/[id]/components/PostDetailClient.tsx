@@ -4,9 +4,11 @@ import { PostData } from "@/types/post";
 import { useEffect, useState } from "react";
 import { getPostDetail } from "../action/getPostDetail";
 import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 import PostHeader from "./PostHeader";
 import PostImages from "./PostImages";
 import PostContent from "./PostContent";
+import PostActionsMenu from "@/components/post/postActionsMenu";
 
 interface PostDetailClientProps {
   postId: number;
@@ -15,6 +17,12 @@ interface PostDetailClientProps {
 const PostDetailClient = ({ postId }: PostDetailClientProps) => {
   const [post, setPost] = useState<PostData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isOwner, setIsOwner] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    setIsOwner(localStorage.getItem("isOwner") === "true");
+  }, []);
 
   useEffect(() => {
     const fetchPostDetail = async () => {
@@ -46,8 +54,18 @@ const PostDetailClient = ({ postId }: PostDetailClientProps) => {
 
   const hasImage = post.main_image && post.main_image !== "";
 
+  const handleDeleteSuccess = () => {
+    router.push("/");
+  };
+
   return (
-    <article className="flex flex-col space-y-6">
+    <article className="relative flex flex-col space-y-6">
+      {isOwner && (
+        <div className="absolute top-0 right-0">
+          <PostActionsMenu postId={postId} hasImage={false} onSuccess={handleDeleteSuccess} />
+        </div>
+      )}
+
       <PostHeader
         title={post.title}
         createdAt={post.created_at}
