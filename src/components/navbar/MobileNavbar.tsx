@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/tailwindMerge";
 import { useEffect, useState } from "react";
 import { logoutAction } from "@/action/logoutAction";
@@ -10,7 +10,6 @@ import toast from "react-hot-toast";
 
 const MobileNavbar = () => {
   const pathname = usePathname();
-  const router = useRouter();
   const [showMobileNavbar, setShowMobileNavbar] = useState(false);
 
   useEffect(() => {
@@ -27,8 +26,7 @@ const MobileNavbar = () => {
 
       if (result.success) { 
         toast.success("로그아웃되었습니다.");
-        router.push("/");
-        router.refresh();
+        window.location.href = "/";
       } else {
         if (result.error) {
           toast.error(result.error);

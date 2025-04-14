@@ -55,7 +55,7 @@ const getCategories = async (): Promise<Category> => {
 const BlogSection = ({ isLoggedIn }: BlogSectionProps) => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [activeCategory, setActiveCategory] = useState<number>(1);
+  const [activeCategory, setActiveCategory] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isOwner, setIsOwner] = useState<boolean>(false);
@@ -83,8 +83,8 @@ const BlogSection = ({ isLoggedIn }: BlogSectionProps) => {
     queryKey: ["posts", activeCategory, currentPage, searchQuery],
     queryFn: async () => {
       const result = await getPosts({
-        // 검색어가 있고 activeCategory가 0인 경우 카테고리 필터링 없이 검색
-        category_id: searchQuery && activeCategory === 0 ? undefined : activeCategory,
+        // 카테고리가 0(전체)인 경우 category_id를 전달하지 않음
+        category_id: activeCategory === 0 ? undefined : activeCategory,
         page: currentPage,
         page_size: 10,
         title: searchQuery || undefined,
@@ -122,8 +122,8 @@ const BlogSection = ({ isLoggedIn }: BlogSectionProps) => {
       setActiveCategory(0);
       setSearchQuery(query);
     } else {
-      // 검색어가 없으면 URL의 카테고리 파라미터 사용
-      const category = searchParams.get("category") || "1";
+      // 검색어가 없으면 URL의 카테고리 파라미터 사용 (기본값은 전체(0))
+      const category = searchParams.get("category") || "0";
       setActiveCategory(Number(category));
     }
 
@@ -139,7 +139,6 @@ const BlogSection = ({ isLoggedIn }: BlogSectionProps) => {
     // 검색어가 있는 경우 카테고리 파라미터를 제거하여 전체 카테고리에서 검색
     if (query) {
       params.set("query", query);
-      // 카테고리 파라미터는 설정하지 않음 (전체 검색을 위해)
       setActiveCategory(0);
     } else {
       // 검색어가 없으면 현재 활성화된 카테고리 유지

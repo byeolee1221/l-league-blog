@@ -7,6 +7,7 @@ import Link from "next/link";
 import { getPosts } from "../action/getPosts";
 import { PostData } from "@/types/post";
 
+// 최신순 정렬 랭킹
 const ViewRanking = () => {
   const [posts, setPosts] = useState<PostData[]>([]);
   const [loading, setLoading] = useState(true);
