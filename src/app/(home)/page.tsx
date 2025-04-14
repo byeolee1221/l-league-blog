@@ -15,7 +15,7 @@ const Home = async () => {
         <ViewRanking />
         <BlogSection isLoggedIn={isLoggedIn} />
       </div>
-      <BlogFloatingButton />
+      {isLoggedIn && <BlogFloatingButton />}
     </main>
   );
 };
