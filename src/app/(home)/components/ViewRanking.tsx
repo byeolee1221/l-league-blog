@@ -116,11 +116,11 @@ const RankingCard = ({ post, index }: { post: PostData; index: number }) => (
           sizes="(max-width: 768px) 280px, (max-width: 1024px) 360px, 240px"
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center bg-gray-100">
+        <div className="flex size-full items-center justify-center bg-gray-100">
           {getListIcon("imageOff", "text-4xl text-gray-400")}
         </div>
       )}
-      <div className="absolute top-2 left-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-sm font-semibold backdrop-blur-sm">
+      <div className="absolute top-2 left-2 flex size-8 items-center justify-center rounded-full bg-white/80 text-sm font-semibold backdrop-blur-sm">
         {index + 1}
       </div>
     </div>

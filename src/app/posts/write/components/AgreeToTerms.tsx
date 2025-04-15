@@ -15,7 +15,7 @@ const AgreeToTerms = ({ value, onChange, error }: AgreeToTermsProps) => {
         <div
           onClick={() => onChange(!value)}
           className={cn(
-            "mr-2 flex h-5 w-5 cursor-pointer items-center justify-center rounded border transition-colors",
+            "mr-2 flex size-5 cursor-pointer items-center justify-center rounded border transition-colors",
             value ? "border-orange-500 bg-orange-500" : "border-gray-300",
             error && "border-red-500",
           )}
