@@ -18,7 +18,10 @@ export const metadata: Metadata = {
   description: "엘리그 블로그입니다.",
   metadataBase: new URL("http://localhost:3000"),
   openGraph: {
-    title: "엘리그 블로그",
+    title: {
+      template: "%s | 엘리그 블로그",
+      default: "엘리그 블로그",
+    },
     description: "엘리그 블로그입니다.",
     url: "http://localhost:3000",
   }

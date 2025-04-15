@@ -6,6 +6,9 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "게시글 수정",
+  openGraph: {
+    title: "게시글 수정",
+  }
 };
 
 interface EditPageParams {

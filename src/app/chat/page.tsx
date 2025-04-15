@@ -2,6 +2,9 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "채팅",
+  openGraph: {
+    title: "채팅",
+  }
 };
 
 const ChatPage = () => {

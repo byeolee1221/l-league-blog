@@ -4,6 +4,9 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "게시글 작성",
+  openGraph: {
+    title: "게시글 작성",
+  }
 };
 
 const WritePage = () => {

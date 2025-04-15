@@ -2,6 +2,9 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "랭킹",
+  openGraph: {
+    title: "랭킹",
+  }
 };
 
 const RankPage = () => {

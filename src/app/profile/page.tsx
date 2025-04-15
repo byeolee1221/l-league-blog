@@ -2,6 +2,9 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "프로필",
+  openGraph: {
+    title: "프로필",
+  }
 };
 
 const ProfilePage = () => {

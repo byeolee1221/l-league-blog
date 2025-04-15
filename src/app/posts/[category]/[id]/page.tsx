@@ -5,6 +5,9 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "게시글 상세",
+  openGraph: {
+    title: "게시글 상세",
+  }
 };
 
 interface PostDetailParams {

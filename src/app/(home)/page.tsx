@@ -7,6 +7,9 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "메인",
+  openGraph: {
+    title: "메인",
+  }
 };
 
 const Home = async () => {
