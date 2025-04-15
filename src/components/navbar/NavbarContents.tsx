@@ -91,7 +91,7 @@ const NavbarContents = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
 
       {/* 로그인/로그아웃 버튼 */}
       {config.showAuthButtons && (
-        <div className={cn("hidden lg:block", config.type === "editor" ? "lg:block" : "")}>
+        <div className="hidden lg:block">
           {isLoggedIn ? (
             <button 
               onClick={handleLogout}
