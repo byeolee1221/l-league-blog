@@ -7,6 +7,10 @@ export const logoutAction = async () => {
   const cookieStore = await cookies();
   const refreshToken = cookieStore.get("refresh_token")?.value;
 
+  if (!refreshToken) { 
+    return { error: "장시간 활동이 없어 로그아웃되었습니다." };
+  }
+
   try {
     if (refreshToken) {
       await fetch(`${process.env.BASE_API_URL}/api/v1/auth/logout`, {
