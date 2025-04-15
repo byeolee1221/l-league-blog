@@ -3,6 +3,11 @@ import BlogFloatingButton from "./components/BlogFloatingButton";
 import BlogSection from "./components/BlogSection";
 import MainNoticeBar from "./components/MainNoticeBar";
 import ViewRanking from "./components/ViewRanking";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "메인",
+};
 
 const Home = async () => {
   const cookieStore = await cookies();

@@ -1,5 +1,10 @@
 import WriteNoticeBar from "./components/WriteNoticeBar";
 import WritePost from "./components/WritePost";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "게시글 작성",
+};
 
 const WritePage = () => {
   return (

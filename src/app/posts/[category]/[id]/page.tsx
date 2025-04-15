@@ -1,6 +1,11 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import PostDetailClient from "./components/PostDetailClient";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "게시글 상세",
+};
 
 interface PostDetailParams {
   params: Promise<{ id: string }>;

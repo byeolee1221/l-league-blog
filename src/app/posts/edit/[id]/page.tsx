@@ -2,6 +2,11 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import WriteNoticeBar from "../../write/components/WriteNoticeBar";
 import WritePost from "../../write/components/WritePost";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "게시글 수정",
+};
 
 interface EditPageParams {
   params: Promise<{ id: string }>;

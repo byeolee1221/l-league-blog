@@ -11,8 +11,17 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "엘리그 블로그",
+  title: {
+    template: "%s | 엘리그 블로그",
+    default: "메인",
+  },
   description: "엘리그 블로그입니다.",
+  metadataBase: new URL("http://localhost:3000"),
+  openGraph: {
+    title: "엘리그 블로그",
+    description: "엘리그 블로그입니다.",
+    url: "http://localhost:3000",
+  }
 };
 
 export default function RootLayout({
